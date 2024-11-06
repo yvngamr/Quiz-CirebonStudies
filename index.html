@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz V-3.0-Cirebon Studies</title>
+  <title>Quiz-Cirebon Studies</title>
   <meta property="og:title" content="Quiz mata Kuliah Cirebon Studies">
   <meta property="og:url" content="https://myportfolio.vercel.app/">
   <meta property="og:description" content="Quiz mata Kuliah Cirebon Studies">
@@ -309,6 +309,7 @@
       <div id="result" class="result hide"></div>
       <button id="submit" class="button hide">Kirim</button>
       <button id="shareWhatsApp" class="button hide">Share ke WhatsApp</button>
+      <button id="retakeQuizButton" class="button hide">AKU INGIN MENGERJAKANNYA KEMBALI</button>
     </div>
   </div>
   <script>
@@ -363,9 +364,9 @@
       },
       {
         question: '9. Wayang Kulit dalam tradisi Sloan memuat tokoh-tokoh seperti?',
-        options: ['Jakariyyah', 'Abdillah',   'Abdullah', 'Cepot'],
+        options: ['Jakariyyah', 'Abdillah', 'Abdullah', 'Cepot'],
         answer: 'Abdullah',
-        image: 'https://stickercommunity.com/uploads/main/25-08-2023-09-24-59owz1r-sticker17.webp'
+        image:  'https://stickercommunity.com/uploads/main/25-08-2023-09-24-59owz1r-sticker17.webp'
       },
       {
         question: '10. Festival Sloan merupakan salah satu perayaan Tahun Baru dalam penanggalan Jawa dan jatuh pada bulan?',
@@ -388,6 +389,7 @@
     const resultContainer = document.getElementById('result');
     const submitButton = document.getElementById('submit');
     const shareWhatsAppButton = document.getElementById('shareWhatsApp');
+    const retakeQuizButton = document.getElementById('retakeQuizButton');
 
     let currentQuestion = 0;
     let score = 0;
@@ -395,6 +397,16 @@
     let timer;
     let timeLeft = 30; // 30 seconds per question
     let quizCompleted = false;
+
+    // Check if quiz can be retaken
+    window.addEventListener('load', () => {
+      if (localStorage.getItem('quizCompleted') !== 'true') {
+        console.log('Kuis dapat diulang.');
+      } else {
+        console.log('Kuis tidak dapat diulang.');
+      }
+    });
+
 
     // Create falling stars
     const starsContainer = document.querySelector('.stars');
@@ -616,9 +628,33 @@
     }
 
     function showCompletionNotification() {
-      notification.textContent = 'KAMU UDAH NGISI';
-      notification.classList.remove('hide');
-      rulesContainer.classList.add('hide');
+      if (localStorage.getItem('quizCompleted') === 'true') {
+        notification.textContent = 'KAMU UDAH NGISI';
+        notification.classList.remove('hide');
+        rulesContainer.classList.add('hide');
+        retakeQuizButton.classList.add('hide');
+      } else {
+        resetQuiz();
+      }
+    }
+
+    function requestRetakeQuiz() {
+      const message = 'AKU INGIN MENGERJAKANNYA KEMBALI';
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+
+    function resetQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      incorrectAnswers = [];
+      quizCompleted = false;
+      localStorage.removeItem('quizCompleted');
+      notification.classList.add('hide');
+      retakeQuizButton.classList.add('hide');
+      rulesContainer.classList.remove('hide');
+      resultContainer.classList.add('hide');
+      shareWhatsAppButton.classList.add('hide');
     }
 
     understandButton.addEventListener('click', showNameInput);
@@ -631,6 +667,14 @@
     });
     shareWhatsAppButton.addEventListener('click', shareToWhatsApp);
     quizContainer.addEventListener('change', enableSubmitButton);
+    retakeQuizButton.addEventListener('click', requestRetakeQuiz);
+
+    // Simulating the response from the admin
+    window.addEventListener('message', (event) => {
+      if (event.data === 'YA') {
+        resetQuiz();
+      }
+    });
 
     // Prevent retaking the quiz
     window.addEventListener('beforeunload', (event) => {
@@ -639,6 +683,13 @@
         event.returnValue = '';
       }
     });
+
+    function enableQuizReset() {
+      localStorage.removeItem('quizCompleted');
+      console.log('Kuis sekarang dapat diulang.');
+    }
+
+  
   </script>
 </body>
-  </html>
+</html>
