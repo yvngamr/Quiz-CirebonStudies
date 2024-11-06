@@ -45,12 +45,8 @@
     }
 
     @keyframes fall {
-      0% {
-        transform: translateY(-100vh);
-      }
-      100% {
-        transform: translateY(100vh);
-      }
+      0% { transform: translateY(-100vh); }
+      100% { transform: translateY(100vh); }
     }
 
     .loading-screen {
@@ -125,12 +121,8 @@
     }
 
     @keyframes rotate {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .content {
@@ -275,6 +267,35 @@
     .feedback.incorrect {
       background-color: rgba(220, 53, 69, 0.2);
     }
+
+    #resetCodeInput {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      box-sizing: border-box;
+    }
+
+    #resetCodeButton {
+      width: 100%;
+      padding: 10px;
+      background-color: #ff00de;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    #resetCodeButton:hover {
+      background-color: #d600b9;
+    }
   </style>
 </head>
 <body>
@@ -309,7 +330,10 @@
       <div id="result" class="result hide"></div>
       <button id="submit" class="button hide">Kirim</button>
       <button id="shareWhatsApp" class="button hide">Share ke WhatsApp</button>
-      <button id="retakeQuizButton" class="button hide">AKU INGIN MENGERJAKANNYA KEMBALI</button>
+      <div id="resetContainer" class="hide">
+        <input type="text" id="resetCodeInput" placeholder="Masukkan kode reset">
+        <button id="resetCodeButton">Reset Quiz</button>
+      </div>
     </div>
   </div>
   <script>
@@ -366,7 +390,7 @@
         question: '9. Wayang Kulit dalam tradisi Sloan memuat tokoh-tokoh seperti?',
         options: ['Jakariyyah', 'Abdillah', 'Abdullah', 'Cepot'],
         answer: 'Abdullah',
-        image:  'https://stickercommunity.com/uploads/main/25-08-2023-09-24-59owz1r-sticker17.webp'
+        image: 'https://stickercommunity.com/uploads/main/25-08-2023-09-24-59owz1r-sticker17.webp'
       },
       {
         question: '10. Festival Sloan merupakan salah satu perayaan Tahun Baru dalam penanggalan Jawa dan jatuh pada bulan?',
@@ -389,24 +413,16 @@
     const resultContainer = document.getElementById('result');
     const submitButton = document.getElementById('submit');
     const shareWhatsAppButton = document.getElementById('shareWhatsApp');
-    const retakeQuizButton = document.getElementById('retakeQuizButton');
+    const resetContainer = document.getElementById('resetContainer');
+    const resetCodeInput = document.getElementById('resetCodeInput');
+    const resetCodeButton = document.getElementById('resetCodeButton');
 
     let currentQuestion = 0;
     let score = 0;
     let incorrectAnswers = [];
     let timer;
-    let timeLeft = 30; // 30 seconds per question
+    let timeLeft = 30;
     let quizCompleted = false;
-
-    // Check if quiz can be retaken
-    window.addEventListener('load', () => {
-      if (localStorage.getItem('quizCompleted') !== 'true') {
-        console.log('Kuis dapat diulang.');
-      } else {
-        console.log('Kuis tidak dapat diulang.');
-      }
-    });
-
 
     // Create falling stars
     const starsContainer = document.querySelector('.stars');
@@ -618,6 +634,7 @@
         </div>
       `;
       resultContainer.classList.remove('hide');
+      resetContainer.classList.remove('hide');
     }
 
     function shareToWhatsApp() {
@@ -628,20 +645,10 @@
     }
 
     function showCompletionNotification() {
-      if (localStorage.getItem('quizCompleted') === 'true') {
-        notification.textContent = 'KAMU UDAH NGISI';
-        notification.classList.remove('hide');
-        rulesContainer.classList.add('hide');
-        retakeQuizButton.classList.add('hide');
-      } else {
-        resetQuiz();
-      }
-    }
-
-    function requestRetakeQuiz() {
-      const message = 'AKU INGIN MENGERJAKANNYA KEMBALI';
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      notification.textContent = 'KAMU UDAH NGISI';
+      notification.classList.remove('hide');
+      rulesContainer.classList.add('hide');
+      resetContainer.classList.remove('hide');
     }
 
     function resetQuiz() {
@@ -651,10 +658,11 @@
       quizCompleted = false;
       localStorage.removeItem('quizCompleted');
       notification.classList.add('hide');
-      retakeQuizButton.classList.add('hide');
       rulesContainer.classList.remove('hide');
       resultContainer.classList.add('hide');
       shareWhatsAppButton.classList.add('hide');
+      resetContainer.classList.add('hide');
+      nameInput.value = '';
     }
 
     understandButton.addEventListener('click', showNameInput);
@@ -667,32 +675,24 @@
     });
     shareWhatsAppButton.addEventListener('click', shareToWhatsApp);
     quizContainer.addEventListener('change', enableSubmitButton);
-    retakeQuizButton.addEventListener('click', requestRetakeQuiz);
 
-    // Simulating the response from the admin
-    window.addEventListener('message', (event) => {
-      if (event.data === 'YA') {
+    resetCodeButton.addEventListener('click', () => {
+      const enteredCode = resetCodeInput.value.trim();
+      if (enteredCode === 'ADMIN BAIK') {
         resetQuiz();
+        alert('Quiz telah direset. Anda dapat mengambil quiz lagi.');
+      } else {
+        alert('Kode reset tidak valid.');
       }
     });
 
-    // Prevent retaking the quiz
+    // Prevent accidental page refresh
     window.addEventListener('beforeunload', (event) => {
-      if (quizCompleted) {
+      if (!quizCompleted) {
         event.preventDefault();
         event.returnValue = '';
       }
     });
-
-    function enableQuizReset() {
-      localStorage.removeItem('quizCompleted');
-      console.log('Kuis sekarang dapat diulang.');
-    }
-
-  function disableQuizReset() {
-      localStorage.setItem('quizCompleted', 'true');
-      console.log('Kuis sekarang tidak dapat diulang.');
-    }
   </script>
 </body>
 </html>
