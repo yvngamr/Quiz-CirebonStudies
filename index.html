@@ -689,7 +689,10 @@
       console.log('Kuis sekarang dapat diulang.');
     }
 
-  
+  function disableQuizReset() {
+      localStorage.setItem('quizCompleted', 'true');
+      console.log('Kuis sekarang tidak dapat diulang.');
+    }
   </script>
 </body>
 </html>
