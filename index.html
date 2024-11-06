@@ -206,7 +206,7 @@
       display: none;
     }
 
-    #nameInput {
+    #nameInput, #tokenInput, #resetCodeInput {
       width: 100%;
       padding: 10px;
       margin-bottom: 15px;
@@ -268,19 +268,6 @@
       background-color: rgba(220, 53, 69, 0.2);
     }
 
-    #resetCodeInput {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
-      background-color: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      box-sizing: border-box;
-    }
-
     #resetCodeButton {
       width: 100%;
       padding: 10px;
@@ -296,6 +283,25 @@
     #resetCodeButton:hover {
       background-color: #d600b9;
     }
+
+    #groupMembersContainer {
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    #groupMembersContainer h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    #groupMembersContainer ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #groupMembersContainer li {
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
@@ -307,7 +313,22 @@
   <div class="container">
     <div class="content">
       <h1>Quiz Cirebon Studies</h1>
-      <div id="rulesContainer">
+      <div id="groupMembersContainer">
+        <h2>Anggota Kelompok:</h2>
+        <ul>
+          <li>Maulana Amri Hasan (NIM: 2482110016)</li>
+          <li>Nur Az Varah (NIM: 2482110017)</li>
+          <li>Silva Noer Awalliyah (NIM: 2482110018)</li>
+          <li>Uswatun Khasanah (NIM: 2482110019)</li>
+          <li>Aulia Gulrukh (NIM: 2482110020)</li>
+        </ul>
+        <button id="okButton" class="button">Oke</button>
+      </div>
+      <div id="tokenContainer" class="hide">
+        <input type="text" id="tokenInput" placeholder="Masukkan token untuk memulai" required>
+        <button id="tokenButton" class="button">Verifikasi Token</button>
+      </div>
+      <div id="rulesContainer" class="hide">
         <h2 style="color: #fff;">Peraturan Quiz</h2>
         <ul style="color: #fff;">
           <li>Jawab semua pertanyaan dengan teliti.</li>
@@ -401,6 +422,11 @@
     ];
 
     const loadingScreen = document.querySelector('.loading-screen');
+    const groupMembersContainer = document.getElementById('groupMembersContainer');
+    const okButton = document.getElementById('okButton');
+    const tokenContainer = document.getElementById('tokenContainer');
+    const tokenInput = document.getElementById('tokenInput');
+    const tokenButton = document.getElementById('tokenButton');
     const rulesContainer = document.getElementById('rulesContainer');
     const understandButton = document.getElementById('understandButton');
     const nameContainer = document.getElementById('nameContainer');
@@ -454,6 +480,21 @@
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function showTokenInput() {
+      groupMembersContainer.classList.add('hide');
+      tokenContainer.classList.remove('hide');
+    }
+
+    function verifyToken() {
+      const token = tokenInput.value.trim();
+      if (token === 'MULAI678910') {
+        tokenContainer.classList.add('hide');
+        rulesContainer.classList.remove('hide');
+      } else {
+        alert('Token tidak valid. Silakan coba lagi.');
       }
     }
 
@@ -647,7 +688,7 @@
     function showCompletionNotification() {
       notification.textContent = 'KAMU UDAH NGISI';
       notification.classList.remove('hide');
-      rulesContainer.classList.add('hide');
+      groupMembersContainer.classList.add('hide');
       resetContainer.classList.remove('hide');
     }
 
@@ -658,13 +699,19 @@
       quizCompleted = false;
       localStorage.removeItem('quizCompleted');
       notification.classList.add('hide');
-      rulesContainer.classList.remove('hide');
+      groupMembersContainer.classList.remove('hide');
+      tokenContainer.classList.add('hide');
+      rulesContainer.classList.add('hide');
+      nameContainer.classList.add('hide');
       resultContainer.classList.add('hide');
       shareWhatsAppButton.classList.add('hide');
       resetContainer.classList.add('hide');
+      tokenInput.value = '';
       nameInput.value = '';
     }
 
+    okButton.addEventListener('click', showTokenInput);
+    tokenButton.addEventListener('click', verifyToken);
     understandButton.addEventListener('click', showNameInput);
     startButton.addEventListener('click', startQuiz);
     submitButton.addEventListener('click', (e) => {
@@ -678,7 +725,7 @@
 
     resetCodeButton.addEventListener('click', () => {
       const enteredCode = resetCodeInput.value.trim();
-      if (enteredCode === 'ADMIN BAIK') {
+      if (enteredCode === 'RESET12345') {
         resetQuiz();
         alert('Quiz telah direset. Anda dapat mengambil quiz lagi.');
       } else {
